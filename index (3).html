@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КП по ИЖС — АН «Простор»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#FF8001;
+    --orange-dark:#DB6C00;
+    --blue:#017AB3;
+    --blue-dark:#015E8A;
+    --bg:#FFFFFF;
+    --paper:#FBF8F4;
+    --ink:#20211F;
+    --ink-soft:#5B5C58;
+    --line:#E7E1D6;
+    --good:#1E8A54;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;}
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+  a{color:var(--blue);}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px;background:var(--ink);color:#fff;
+    position:sticky;top:0;z-index:50;
+  }
+  .topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px;}
+  .topbar .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--orange);}
+  .topbar .brand small{display:block;font-weight:400;color:#C9C9C6;font-size:12px;}
+
+  /* ---------- layout ---------- */
+  .builder{display:grid;grid-template-columns:420px 1fr;gap:0;min-height:calc(100vh - 58px);}
+  @media (max-width:980px){.builder{grid-template-columns:1fr;}}
+
+  .formPanel{
+    background:#fff;border-right:1px solid var(--line);
+    padding:22px;overflow-y:auto;max-height:calc(100vh - 58px);
+  }
+  .formPanel h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin:26px 0 10px;}
+  .formPanel h2:first-child{margin-top:4px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
+  .field input[type=text],
+  .field input[type=number],
+  .field input[type=date],
+  .field input[type=url],
+  .field select,
+  .field textarea{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+    font-family:inherit;font-size:13.5px;background:#fff;color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .checkline{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .checkline input{width:16px;height:16px;}
+  .checkline label{font-size:13px;font-weight:600;color:var(--ink);}
+  .objectBlock{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;background:var(--paper);}
+  .objectBlock h3{font-size:13px;margin:0 0 8px;color:var(--orange-dark);}
+  .hint{font-size:11.5px;color:#8B8C87;margin-top:2px;}
+
+  .actions{position:sticky;bottom:0;background:#fff;padding-top:14px;margin-top:18px;border-top:1px solid var(--line);}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    width:100%;padding:12px 14px;border-radius:10px;border:none;
+    font-weight:700;font-size:14px;cursor:pointer;margin-bottom:8px;
+    font-family:inherit;
+  }
+  .btn-primary{background:var(--orange);color:#fff;}
+  .btn-primary:hover{background:var(--orange-dark);}
+  .btn-secondary{background:var(--blue);color:#fff;}
+  .btn-secondary:hover{background:var(--blue-dark);}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  #linkResult{font-size:12.5px;margin-top:6px;word-break:break-all;}
+  #linkResult a{font-weight:600;}
+  #linkResult button{margin-top:6px;font-size:11.5px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;}
+
+  /* ---------- preview panel ---------- */
+  .previewPanel{background:var(--paper);padding:32px;overflow-y:auto;max-height:calc(100vh - 58px);display:flex;justify-content:center;}
+  .client-view{padding:32px;display:flex;justify-content:center;background:var(--paper);min-height:100vh;}
+
+  .kp-doc{
+    width:100%;max-width:760px;background:#fff;border-radius:var(--radius);
+    box-shadow:0 10px 40px rgba(32,33,31,.08);overflow:hidden;
+  }
+  .kp-head{
+    background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);
+    color:#fff;padding:30px 34px;position:relative;
+  }
+  .kp-head .eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;opacity:.85;font-weight:700;}
+  .kp-head h1{font-size:30px;margin:8px 0 4px;font-weight:600;}
+  .kp-head .meta{font-size:13px;opacity:.9;}
+  .kp-head .badge{
+    position:absolute;top:28px;right:34px;background:var(--orange);color:#fff;
+    font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+
+  .kp-section{padding:26px 34px;border-bottom:1px solid var(--line);}
+  .kp-section:last-child{border-bottom:none;}
+  .kp-section h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--orange-dark);margin:0 0 14px;font-weight:700;}
+
+  .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;}
+  .param{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:6px 0;font-size:13.5px;}
+  .param span:first-child{color:var(--ink-soft);}
+  .param span:last-child{font-weight:600;}
+
+  .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:520px){.pay-grid{grid-template-columns:1fr;}}
+  .pay-card{border-radius:12px;padding:18px;background:var(--paper);border:1px solid var(--line);}
+  .pay-card.family{background:#F0F8F2;border-color:#CFE9D6;}
+  .pay-card .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;}
+  .pay-card .amount{font-family:'Fraunces',serif;font-size:28px;margin:6px 0 2px;font-weight:600;}
+  .pay-card.family .amount{color:var(--good);}
+  .pay-card .sub{font-size:12px;color:var(--ink-soft);}
+  .save-pill{
+    margin-top:14px;background:var(--orange);color:#fff;border-radius:10px;
+    padding:12px 16px;font-size:14px;font-weight:700;text-align:center;
+  }
+  .save-pill b{font-family:'Fraunces',serif;font-size:17px;}
+
+  .obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:600px){.obj-grid{grid-template-columns:1fr;}}
+  .obj-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;}
+  .obj-card img{width:100%;height:130px;object-fit:cover;display:block;background:#EEE;}
+  .obj-card .obj-body{padding:14px;}
+  .obj-card .obj-type{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);font-weight:700;}
+  .obj-card h3{font-size:16px;margin:4px 0 6px;font-family:'Fraunces',serif;}
+  .obj-card .obj-price{font-weight:700;color:var(--orange-dark);font-size:14px;margin-bottom:6px;}
+  .obj-card ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-soft);}
+  .obj-card a.obj-link{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;}
+
+  .flat-compare{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--paper);border-radius:12px;padding:16px;border:1px solid var(--line);}
+  .flat-compare .col{text-align:center;flex:1;}
+  .flat-compare .col .t{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .flat-compare .col .v{font-family:'Fraunces',serif;font-size:22px;margin-top:4px;}
+  .flat-compare .vs{font-size:12px;color:#B0B0AC;font-weight:700;}
+
+  .contacts{display:flex;gap:22px;flex-wrap:wrap;}
+  .contact{flex:1;min-width:200px;}
+  .contact .role{font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.06em;font-weight:700;}
+  .contact .name{font-family:'Fraunces',serif;font-size:18px;margin:4px 0;}
+  .contact .line{font-size:13px;color:var(--ink-soft);}
+
+  .kp-foot{padding:16px 34px 26px;font-size:11px;color:#9C9D97;line-height:1.5;}
+
+  .empty-note{color:#B0B0AC;font-style:italic;}
+
+  #clientBar{max-width:760px;margin:0 auto 14px;display:flex;justify-content:flex-end;}
+
+  /* ---------- print ---------- */
+  @media print{
+    .topbar,.formPanel,#clientBar,.no-print{display:none !important;}
+    body,.previewPanel,.client-view{background:#fff !important;padding:0 !important;}
+    .kp-doc{box-shadow:none !important;max-width:100% !important;border-radius:0 !important;}
+    .builder{display:block !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span><div>АН «Простор» · ИЖС<small>Генератор коммерческого предложения</small></div></div>
+</div>
+
+<!-- ============ BUILDER (agent) ============ -->
+<div class="builder" id="builderView">
+  <aside class="formPanel">
+
+    <h2>Клиент</h2>
+    <div class="field"><label>Имя клиента</label><input type="text" id="clientName" placeholder="Александр"></div>
+    <div class="row2">
+      <div class="field"><label>Дата консультации</label><input type="date" id="consultDate"></div>
+      <div class="field"><label>Срок заезда (желаемый)</label><input type="text" id="moveInTerm" placeholder="3–4 месяца"></div>
+    </div>
+
+    <h2>Финансы</h2>
+    <div class="row2">
+      <div class="field"><label>Бюджет дома, ₽</label><input type="number" id="budgetTotal" placeholder="6000000"></div>
+      <div class="field"><label>Первоначальный взнос, ₽</label><input type="number" id="downPayment" placeholder="1200000"></div>
+    </div>
+    <div class="field"><label>Комфортный платёж клиента, ₽/мес (опционально)</label><input type="number" id="comfortPayment" placeholder="45000"></div>
+    <div class="checkline"><input type="checkbox" id="familyMortgage" checked><label for="familyMortgage">Семейная ипотека доступна</label></div>
+    <div class="row2">
+      <div class="field"><label>Детей в семье</label><input type="number" id="childrenCount" placeholder="1"></div>
+      <div class="field"><label>Срок кредита, лет</label><input type="number" id="termYears" value="30"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Ставка семейная, %</label><input type="number" step="0.1" id="rateFamily" value="6"></div>
+      <div class="field"><label>Ставка рыночная, %</label><input type="number" step="0.1" id="rateMarket" value="21"></div>
+    </div>
+    <p class="hint">Ставки меняются — перед отправкой клиенту сверьте с актуальными условиями банков-партнёров.</p>
+
+    <h2>Участок</h2>
+    <div class="field"><label>Статус участка</label>
+      <select id="plotStatus"><option>Есть</option><option>В поиске</option></select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Направление</label><input type="text" id="plotDirection" placeholder="Новорижское"></div>
+      <div class="field"><label>Бюджет на участок, ₽</label><input type="number" id="plotBudget" placeholder="1500000"></div>
+    </div>
+    <div class="checkline"><input type="checkbox" id="includePlot"><label for="includePlot">Включить бюджет участка в расчёт кредита</label></div>
+
+    <h2>Дом</h2>
+    <div class="row2">
+      <div class="field"><label>Площадь, м²</label><input type="number" id="houseArea" placeholder="120"></div>
+      <div class="field"><label>Технология</label><input type="text" id="technology" placeholder="Каркасная"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Отделка</label>
+        <select id="finish"><option>Тёплый контур</option><option>Вайтбокс</option><option>Под ключ</option></select>
+      </div>
+      <div class="field"><label>Тип продукта</label>
+        <select id="productType"><option>Подряд</option><option>КП</option><option>Участок без подряда</option></select>
+      </div>
+    </div>
+
+    <h2>Сравнение с квартирой</h2>
+    <div class="checkline"><input type="checkbox" id="compareFlat"><label for="compareFlat">Добавить блок сравнения</label></div>
+    <div class="row2">
+      <div class="field"><label>Цена квартиры, ₽</label><input type="number" id="flatPrice" placeholder="7500000"></div>
+      <div class="field"><label>ПВ по квартире, ₽</label><input type="number" id="flatDownPayment" placeholder="1500000"></div>
+    </div>
+
+    <h2>Объект 1</h2>
+    <div class="objectBlock">
+      <div class="row2">
+        <div class="field"><label>Название</label><input type="text" id="o1_name" placeholder="Посёлок «Лесной берег»"></div>
+        <div class="field"><label>Тип</label><select id="o1_type"><option>Посёлок</option><option>Подрядчик</option></select></div>
+      </div>
+      <div class="field"><label>Фото, URL</label><input type="url" id="o1_photo" placeholder="https://..."></div>
+      <div class="row2">
+        <div class="field"><label>Бюджет / цена</label><input type="text" id="o1_price" placeholder="от 5,8 млн ₽"></div>
+        <div class="field"><label>Ссылка</label><input type="url" id="o1_link" placeholder="https://..."></div>
+      </div>
+      <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea id="o1_bullets" placeholder="Газ и электричество по границе&#10;Сдача через 4 месяца&#10;Аккредитация по семейной ипотеке"></textarea></div>
+    </div>
+
+    <h2>Объект 2</h2>
+    <div class="objectBlock">
+      <div class="row2">
+        <div class="field"><label>Название</label><input type="text" id="o2_name" placeholder="Подрядчик «СтройДом»"></div>
+        <div class="field"><label>Тип</label><select id="o2_type"><option>Посёлок</option><option>Подрядчик</option></select></div>
+      </div>
+      <div class="field"><label>Фото, URL</label><input type="url" id="o2_photo" placeholder="https://..."></div>
+      <div class="row2">
+        <div class="field"><label>Бюджет / цена</label><input type="text" id="o2_price" placeholder="от 6,2 млн ₽"></div>
+        <div class="field"><label>Ссылка</label><input type="url" id="o2_link" placeholder="https://..."></div>
+      </div>
+      <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea id="o2_bullets"></textarea></div>
+    </div>
+
+    <div class="checkline"><input type="checkbox" id="addThird"><label for="addThird">Добавить третий объект</label></div>
+    <div class="objectBlock" id="o3_block" style="display:none;">
+      <h3>Объект 3</h3>
+      <div class="row2">
+        <div class="field"><label>Название</label><input type="text" id="o3_name"></div>
+        <div class="field"><label>Тип</label><select id="o3_type"><option>Посёлок</option><option>Подрядчик</option></select></div>
+      </div>
+      <div class="field"><label>Фото, URL</label><input type="url" id="o3_photo"></div>
+      <div class="row2">
+        <div class="field"><label>Бюджет / цена</label><input type="text" id="o3_price"></div>
+        <div class="field"><label>Ссылка</label><input type="url" id="o3_link"></div>
+      </div>
+      <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea id="o3_bullets"></textarea></div>
+    </div>
+
+    <h2>Контакты</h2>
+    <div class="row2">
+      <div class="field"><label>Имя агента</label><input type="text" id="agentName" placeholder="Динислам Мелдебеков"></div>
+      <div class="field"><label>Телефон агента</label><input type="text" id="agentPhone" placeholder="+7 900 000-00-00"></div>
+    </div>
+    <div class="field"><label>Telegram агента</label><input type="text" id="agentTelegram" placeholder="@username"></div>
+    <div class="field"><label>Контакты куратора направления</label><input type="text" id="dinislamContact" placeholder="Динислам · +7 900 000-00-00 · @username"></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btnPdf">Скачать PDF</button>
+      <button class="btn btn-secondary" id="btnLink">Получить ссылку на КП</button>
+      <div id="linkResult"></div>
+    </div>
+  </aside>
+
+  <main class="previewPanel">
+    <div class="kp-doc" id="kpDocument"></div>
+  </main>
+</div>
+
+<!-- ============ CLIENT VIEW ============ -->
+<div class="client-view" id="clientView" hidden>
+  <div style="width:100%;max-width:760px;">
+    <div id="clientBar"><button class="btn btn-primary no-print" id="btnPdfClient" style="width:auto;padding:10px 18px;">Скачать PDF</button></div>
+    <div class="kp-doc" id="kpDocumentClient"></div>
+  </div>
+</div>
+
+<script>
+/* ======= CONFIG =======
+   Вставьте сюда URL веб-приложения Apps Script (см. README) — тот же приём,
+   что и в квизе подрядчиков / карте партнёров: Google Sheets + Apps Script как API. */
+const CONFIG = {
+  APPS_SCRIPT_URL: "" // например: "https://script.google.com/macros/s/AKfycb.../exec"
+};
+
+/* ======= helpers ======= */
+function fmtMoney(n){
+  n = Number(n)||0;
+  return n.toLocaleString('ru-RU', {maximumFractionDigits:0}) + ' ₽';
+}
+function fmtMonth(n){
+  n = Number(n)||0;
+  return n.toLocaleString('ru-RU', {maximumFractionDigits:0}) + ' ₽/мес';
+}
+function annuity(principal, annualRatePct, years){
+  principal = Math.max(0, Number(principal)||0);
+  const years_ = Math.max(1, Number(years)||30);
+  const r = (Number(annualRatePct)||0)/100/12;
+  const n = years_*12;
+  if(principal<=0) return 0;
+  if(r===0) return principal/n;
+  const pow = Math.pow(1+r, n);
+  return principal * r * pow / (pow - 1);
+}
+function val(id){ const el=document.getElementById(id); if(!el) return ''; return el.type==='checkbox'? el.checked : el.value; }
+function esc(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function bulletsHtml(text){
+  const lines = (text||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!lines.length) return '';
+  return '<ul>'+lines.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>';
+}
+function fmtDate(d){
+  if(!d) return '';
+  const parts = d.split('-');
+  if(parts.length!==3) return d;
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  return `${parseInt(parts[2],10)} ${months[parseInt(parts[1],10)-1]} ${parts[0]}`;
+}
+
+/* ======= collect form data ======= */
+function collectFormData(){
+  return {
+    clientName: val('clientName'),
+    consultDate: val('consultDate'),
+    moveInTerm: val('moveInTerm'),
+    budgetTotal: val('budgetTotal'),
+    downPayment: val('downPayment'),
+    comfortPayment: val('comfortPayment'),
+    familyMortgage: val('familyMortgage'),
+    childrenCount: val('childrenCount'),
+    termYears: val('termYears'),
+    rateFamily: val('rateFamily'),
+    rateMarket: val('rateMarket'),
+    plotStatus: val('plotStatus'),
+    plotDirection: val('plotDirection'),
+    plotBudget: val('plotBudget'),
+    includePlot: val('includePlot'),
+    houseArea: val('houseArea'),
+    technology: val('technology'),
+    finish: val('finish'),
+    productType: val('productType'),
+    compareFlat: val('compareFlat'),
+    flatPrice: val('flatPrice'),
+    flatDownPayment: val('flatDownPayment'),
+    objects: [
+      {name:val('o1_name'),type:val('o1_type'),photo:val('o1_photo'),price:val('o1_price'),link:val('o1_link'),bullets:val('o1_bullets')},
+      {name:val('o2_name'),type:val('o2_type'),photo:val('o2_photo'),price:val('o2_price'),link:val('o2_link'),bullets:val('o2_bullets')},
+      val('addThird') ? {name:val('o3_name'),type:val('o3_type'),photo:val('o3_photo'),price:val('o3_price'),link:val('o3_link'),bullets:val('o3_bullets')} : null
+    ].filter(o=>o && (o.name||o.price)),
+    agentName: val('agentName'),
+    agentPhone: val('agentPhone'),
+    agentTelegram: val('agentTelegram'),
+    dinislamContact: val('dinislamContact')
+  };
+}
+
+/* ======= render KP ======= */
+function renderKP(d){
+  const budget = Number(d.budgetTotal)||0;
+  const dp = Number(d.downPayment)||0;
+  const plot = d.includePlot ? (Number(d.plotBudget)||0) : 0;
+  const principal = Math.max(0, budget + plot - dp);
+
+  const payFamily = d.familyMortgage ? annuity(principal, d.rateFamily, d.termYears) : null;
+  const payMarket = annuity(principal, d.rateMarket, d.termYears);
+  const saving = (payFamily!==null) ? Math.round(payMarket - payFamily) : 0;
+
+  let payBlock = `
+    <div class="pay-grid">
+      <div class="pay-card">
+        <div class="label">Рыночная ставка (${esc(d.rateMarket||'—')}%)</div>
+        <div class="amount">${fmtMonth(payMarket)}</div>
+        <div class="sub">на ${esc(d.termYears||'—')} лет</div>
+      </div>`;
+  if(payFamily!==null){
+    payBlock += `
+      <div class="pay-card family">
+        <div class="label">Семейная ипотека (${esc(d.rateFamily||'—')}%)</div>
+        <div class="amount">${fmtMonth(payFamily)}</div>
+        <div class="sub">на ${esc(d.termYears||'—')} лет</div>
+      </div>`;
+  }
+  payBlock += `</div>`;
+  if(payFamily!==null && saving>0){
+    payBlock += `<div class="save-pill">Экономия на семейной ипотеке: <b>${fmtMonth(saving)}</b> каждый месяц</div>`;
+  }
+  if(d.comfortPayment){
+    payBlock += `<p class="hint" style="margin-top:10px;">Комфортный платёж клиента: <b>${fmtMonth(d.comfortPayment)}</b></p>`;
+  }
+
+  let flatBlock = '';
+  if(d.compareFlat && (d.flatPrice||d.flatDownPayment)){
+    const flatPrincipal = Math.max(0, (Number(d.flatPrice)||0) - (Number(d.flatDownPayment)||0));
+    const flatPay = annuity(flatPrincipal, d.rateMarket, d.termYears);
+    const housePay = payFamily!==null ? payFamily : payMarket;
+    flatBlock = `
+      <div class="kp-section">
+        <h2>Свой дом vs квартира</h2>
+        <div class="flat-compare">
+          <div class="col"><div class="t">Ваш дом</div><div class="v">${fmtMonth(housePay)}</div></div>
+          <div class="vs">vs</div>
+          <div class="col"><div class="t">Аналог. квартира</div><div class="v">${fmtMonth(flatPay)}</div></div>
+        </div>
+      </div>`;
+  }
+
+  const objCards = (d.objects||[]).map(o=>`
+    <div class="obj-card">
+      ${o.photo ? `<img src="${esc(o.photo)}" alt="${esc(o.name)}">` : ''}
+      <div class="obj-body">
+        <div class="obj-type">${esc(o.type||'')}</div>
+        <h3>${esc(o.name)||'Без названия'}</h3>
+        ${o.price ? `<div class="obj-price">${esc(o.price)}</div>` : ''}
+        ${bulletsHtml(o.bullets)}
+        ${o.link ? `<a class="obj-link" href="${esc(o.link)}" target="_blank" rel="noopener">Смотреть подробнее →</a>` : ''}
+      </div>
+    </div>`).join('');
+
+  const plotLine = d.plotStatus==='В поиске'
+    ? `<div class="param"><span>Участок</span><span>в поиске, ${esc(d.plotDirection||'—')}, до ${fmtMoney(d.plotBudget)}</span></div>`
+    : `<div class="param"><span>Участок</span><span>есть${d.plotDirection?', '+esc(d.plotDirection):''}</span></div>`;
+
+  return `
+    <div class="kp-head">
+      <span class="badge">${esc(d.productType||'Подряд')}</span>
+      <div class="eyebrow">Индивидуальное предложение · ИЖС</div>
+      <h1>${esc(d.clientName)||'Клиент'}</h1>
+      <div class="meta">${d.consultDate?('Консультация от '+fmtDate(d.consultDate)):''}${d.moveInTerm?(' · заезд через '+esc(d.moveInTerm)):''}</div>
+    </div>
+
+    <div class="kp-section">
+      <h2>Параметры проекта</h2>
+      <div class="params-grid">
+        <div class="param"><span>Бюджет дома</span><span>${fmtMoney(d.budgetTotal)}</span></div>
+        <div class="param"><span>Первоначальный взнос</span><span>${fmtMoney(d.downPayment)}</span></div>
+        <div class="param"><span>Площадь дома</span><span>${esc(d.houseArea)||'—'} м²</span></div>
+        <div class="param"><span>Технология</span><span>${esc(d.technology)||'—'}</span></div>
+        <div class="param"><span>Отделка</span><span>${esc(d.finish)||'—'}</span></div>
+        <div class="param"><span>Дети в семье</span><span>${esc(d.childrenCount)||'—'}</span></div>
+        ${plotLine}
+      </div>
+    </div>
+
+    <div class="kp-section">
+      <h2>Расчёт ипотеки</h2>
+      ${payBlock}
+    </div>
+
+    ${flatBlock}
+
+    <div class="kp-section">
+      <h2>Подобранные варианты</h2>
+      ${objCards ? `<div class="obj-grid">${objCards}</div>` : '<p class="empty-note">Варианты будут добавлены агентом.</p>'}
+    </div>
+
+    <div class="kp-section">
+      <h2>Контакты</h2>
+      <div class="contacts">
+        <div class="contact">
+          <div class="role">Ваш агент</div>
+          <div class="name">${esc(d.agentName)||'—'}</div>
+          <div class="line">${esc(d.agentPhone)||''}</div>
+          <div class="line">${esc(d.agentTelegram)||''}</div>
+        </div>
+        <div class="contact">
+          <div class="role">Куратор направления ИЖС</div>
+          <div class="name">${esc(d.dinislamContact)||'—'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kp-foot">
+      Расчёт носит предварительный характер и не является офертой. Точные условия по ипотеке определяются банком по итогам рассмотрения заявки. АН «Простор», направление ИЖС.
+    </div>
+  `;
+}
+
+/* ======= builder mode wiring ======= */
+function initBuilder(){
+  document.getElementById('consultDate').value = new Date().toISOString().slice(0,10);
+
+  const form = document.querySelector('.formPanel');
+  form.addEventListener('input', ()=>{
+    document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
+  });
+  document.getElementById('addThird').addEventListener('change', (e)=>{
+    document.getElementById('o3_block').style.display = e.target.checked ? 'block' : 'none';
+    document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
+  });
+
+  document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
+
+  document.getElementById('btnPdf').addEventListener('click', ()=>{
+    const name = val('clientName') || 'клиент';
+    document.title = 'КП ИЖС — ' + name;
+    window.print();
+  });
+
+  document.getElementById('btnLink').addEventListener('click', async ()=>{
+    const resultEl = document.getElementById('linkResult');
+    if(!CONFIG.APPS_SCRIPT_URL){
+      resultEl.innerHTML = '<span style="color:#B23">Не настроен APPS_SCRIPT_URL в index.html — см. README.</span>';
+      return;
+    }
+    resultEl.textContent = 'Сохраняем…';
+    try{
+      const data = collectFormData();
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'}, // избегаем preflight OPTIONS у Apps Script
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if(json.id){
+        const url = location.origin + location.pathname + '?id=' + json.id;
+        resultEl.innerHTML = `Ссылка готова: <a href="${url}" target="_blank">${url}</a><br><button id="copyLink">Скопировать</button>`;
+        document.getElementById('copyLink').addEventListener('click', ()=>{
+          navigator.clipboard.writeText(url);
+        });
+      } else {
+        resultEl.textContent = 'Ошибка сохранения: ' + (json.error||'неизвестно');
+      }
+    }catch(err){
+      resultEl.textContent = 'Ошибка сети: ' + err.message;
+    }
+  });
+}
+
+/* ======= client mode wiring ======= */
+async function initClient(id){
+  document.getElementById('builderView').hidden = true;
+  document.getElementById('clientView').hidden = false;
+  const target = document.getElementById('kpDocumentClient');
+  target.innerHTML = '<div class="kp-section">Загружаем предложение…</div>';
+  try{
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL + '?id=' + encodeURIComponent(id));
+    const data = await res.json();
+    if(data.error){
+      target.innerHTML = '<div class="kp-section">Предложение не найдено. Уточните ссылку у агента.</div>';
+      return;
+    }
+    document.title = 'КП ИЖС — ' + (data.clientName||'');
+    target.innerHTML = renderKP(data);
+  }catch(err){
+    target.innerHTML = '<div class="kp-section">Не удалось загрузить предложение. Проверьте подключение к интернету.</div>';
+  }
+}
+
+/* ======= entry point ======= */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if(id){
+    initClient(id);
+    document.getElementById('btnPdfClient').addEventListener('click', ()=>window.print());
+  } else {
+    initBuilder();
+  }
+})();
+</script>
+</body>
+</html>
