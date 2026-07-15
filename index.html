@@ -94,25 +94,25 @@
   }
   .kp-head{
     background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);
-    color:#fff;padding:30px 34px;position:relative;
+    color:#fff;padding:30px 34px;
+  }
+  .kp-head .badge{
+    display:inline-block;margin-bottom:12px;background:var(--orange);color:#fff;
+    font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:.05em;
   }
   .kp-head .eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;opacity:.85;font-weight:700;}
   .kp-head h1{font-size:30px;margin:8px 0 4px;font-weight:600;}
   .kp-head .meta{font-size:13px;opacity:.9;}
-  .kp-head .badge{
-    position:absolute;top:28px;right:34px;background:var(--orange);color:#fff;
-    font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:999px;
-    text-transform:uppercase;letter-spacing:.05em;
-  }
 
   .kp-section{padding:26px 34px;border-bottom:1px solid var(--line);}
   .kp-section:last-child{border-bottom:none;}
   .kp-section h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--orange-dark);margin:0 0 14px;font-weight:700;}
 
-  .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;}
-  .param{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:6px 0;font-size:13.5px;}
+  .params-grid{display:block;}
+  .param{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-bottom:1px dotted var(--line);padding:8px 0;font-size:13.5px;}
   .param span:first-child{color:var(--ink-soft);}
-  .param span:last-child{font-weight:600;}
+  .param span:last-child{font-weight:600;text-align:right;}
 
   .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   @media (max-width:520px){.pay-grid{grid-template-columns:1fr;}}
@@ -154,6 +154,14 @@
   .kp-foot{padding:16px 34px 26px;font-size:11px;color:#9C9D97;line-height:1.5;}
 
   .empty-note{color:#B0B0AC;font-style:italic;}
+
+  @media (max-width:560px){
+    .kp-head{padding:22px 20px;}
+    .kp-head h1{font-size:24px;}
+    .kp-section{padding:20px 20px;}
+    .kp-foot{padding:14px 20px 20px;}
+    .param{font-size:13px;}
+  }
 
   #clientBar{max-width:760px;margin:0 auto 14px;display:flex;justify-content:flex-end;}
 
@@ -307,17 +315,17 @@
    Вставьте сюда URL веб-приложения Apps Script (см. README) — тот же приём,
    что и в квизе подрядчиков / карте партнёров: Google Sheets + Apps Script как API. */
 const CONFIG = {
-  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzJsfgEpq5HZKHPAAPBOmlP6A9RGU6BtJIXeiyrjUgfjj3oXCLWJly7JzlduBUI0VB0/exec" // например: "https://script.google.com/macros/s/AKfycb.../exec"
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzJsfgEpq5HZKHPAAPBOmlP6A9RGU6BtJIXeiyrjUgfjj3oXCLWJly7JzlduBUI0VB0/exec"
 };
 
 /* ======= helpers ======= */
 function fmtMoney(n){
   n = Number(n)||0;
-  return n.toLocaleString('ru-RU', {maximumFractionDigits:0}) + ' ₽';
+  return n.toLocaleString('ru-RU', {maximumFractionDigits:0}) + '\u00A0₽';
 }
 function fmtMonth(n){
   n = Number(n)||0;
-  return n.toLocaleString('ru-RU', {maximumFractionDigits:0}) + ' ₽/мес';
+  return n.toLocaleString('ru-RU', {maximumFractionDigits:0}) + '\u00A0₽/мес';
 }
 function annuity(principal, annualRatePct, years){
   principal = Math.max(0, Number(principal)||0);
@@ -460,7 +468,7 @@ function renderKP(d){
       <div class="params-grid">
         <div class="param"><span>Бюджет дома</span><span>${fmtMoney(d.budgetTotal)}</span></div>
         <div class="param"><span>Первоначальный взнос</span><span>${fmtMoney(d.downPayment)}</span></div>
-        <div class="param"><span>Площадь дома</span><span>${esc(d.houseArea)||'—'} м²</span></div>
+        <div class="param"><span>Площадь дома</span><span>${esc(d.houseArea)||'—'}\u00A0м²</span></div>
         <div class="param"><span>Технология</span><span>${esc(d.technology)||'—'}</span></div>
         <div class="param"><span>Отделка</span><span>${esc(d.finish)||'—'}</span></div>
         <div class="param"><span>Дети в семье</span><span>${esc(d.childrenCount)||'—'}</span></div>
