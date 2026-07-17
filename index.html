@@ -66,6 +66,14 @@
   .checkline label{font-size:13px;font-weight:600;color:var(--ink);}
   .objectBlock{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;background:var(--paper);}
   .objectBlock h3{font-size:13px;margin:0 0 8px;color:var(--orange-dark);}
+  .objectBlock .objHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .objectBlock .objHead h3{margin:0;}
+  .btn-remove-obj{
+    background:#fff;border:1px solid var(--line);color:#B23;
+    width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .btn-remove-obj:hover{background:#FBEAEA;}
   .hint{font-size:11.5px;color:#8B8C87;margin-top:2px;}
 
   .actions{position:sticky;bottom:0;background:#fff;padding-top:14px;margin-top:18px;border-top:1px solid var(--line);}
@@ -232,6 +240,12 @@
       </div>
     </div>
 
+    <h2>Альтернативы для клиентов с участком</h2>
+    <div class="checkline"><input type="checkbox" id="showLandAlt"><label for="showLandAlt">«Нал за участок» vs «тот же нал как ПВ за участок + дом»</label></div>
+    <div class="field"><label>Весь свободный капитал клиента, ₽</label><input type="number" id="cashAvailable" placeholder="3000000"></div>
+    <div class="checkline"><input type="checkbox" id="compareLandMortgage"><label for="compareLandMortgage">«Ипотека только на участок» vs «ипотека на участок + дом»</label></div>
+    <p class="hint">Оба блока используют поля «Бюджет на участок», «Бюджет дома», ПВ, ставки и срок из блоков выше — отдельно ничего заполнять не нужно.</p>
+
     <h2>Сравнение с квартирой</h2>
     <div class="checkline"><input type="checkbox" id="compareFlat"><label for="compareFlat">Добавить блок сравнения</label></div>
     <div class="row2">
@@ -239,48 +253,9 @@
       <div class="field"><label>ПВ по квартире, ₽</label><input type="number" id="flatDownPayment" placeholder="1500000"></div>
     </div>
 
-    <h2>Объект 1</h2>
-    <div class="objectBlock">
-      <div class="row2">
-        <div class="field"><label>Название</label><input type="text" id="o1_name" placeholder="Посёлок «Лесной берег»"></div>
-        <div class="field"><label>Тип</label><select id="o1_type"><option>Посёлок</option><option>Подрядчик</option></select></div>
-      </div>
-      <div class="field"><label>Фото, URL</label><input type="url" id="o1_photo" placeholder="https://..."></div>
-      <div class="row2">
-        <div class="field"><label>Бюджет / цена</label><input type="text" id="o1_price" placeholder="от 5,8 млн ₽"></div>
-        <div class="field"><label>Ссылка</label><input type="url" id="o1_link" placeholder="https://..."></div>
-      </div>
-      <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea id="o1_bullets" placeholder="Газ и электричество по границе&#10;Сдача через 4 месяца&#10;Аккредитация по семейной ипотеке"></textarea></div>
-    </div>
-
-    <h2>Объект 2</h2>
-    <div class="objectBlock">
-      <div class="row2">
-        <div class="field"><label>Название</label><input type="text" id="o2_name" placeholder="Подрядчик «СтройДом»"></div>
-        <div class="field"><label>Тип</label><select id="o2_type"><option>Посёлок</option><option>Подрядчик</option></select></div>
-      </div>
-      <div class="field"><label>Фото, URL</label><input type="url" id="o2_photo" placeholder="https://..."></div>
-      <div class="row2">
-        <div class="field"><label>Бюджет / цена</label><input type="text" id="o2_price" placeholder="от 6,2 млн ₽"></div>
-        <div class="field"><label>Ссылка</label><input type="url" id="o2_link" placeholder="https://..."></div>
-      </div>
-      <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea id="o2_bullets"></textarea></div>
-    </div>
-
-    <div class="checkline"><input type="checkbox" id="addThird"><label for="addThird">Добавить третий объект</label></div>
-    <div class="objectBlock" id="o3_block" style="display:none;">
-      <h3>Объект 3</h3>
-      <div class="row2">
-        <div class="field"><label>Название</label><input type="text" id="o3_name"></div>
-        <div class="field"><label>Тип</label><select id="o3_type"><option>Посёлок</option><option>Подрядчик</option></select></div>
-      </div>
-      <div class="field"><label>Фото, URL</label><input type="url" id="o3_photo"></div>
-      <div class="row2">
-        <div class="field"><label>Бюджет / цена</label><input type="text" id="o3_price"></div>
-        <div class="field"><label>Ссылка</label><input type="url" id="o3_link"></div>
-      </div>
-      <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea id="o3_bullets"></textarea></div>
-    </div>
+    <h2>Варианты объектов</h2>
+    <div id="objectsContainer"></div>
+    <button type="button" class="btn btn-ghost no-print" id="btnAddObject" style="margin-bottom:14px;">+ Добавить объект</button>
 
     <h2>Контакты</h2>
     <div class="row2">
@@ -374,14 +349,20 @@ function collectFormData(){
     technology: val('technology'),
     finish: val('finish'),
     productType: val('productType'),
+    showLandAlt: val('showLandAlt'),
+    cashAvailable: val('cashAvailable'),
+    compareLandMortgage: val('compareLandMortgage'),
     compareFlat: val('compareFlat'),
     flatPrice: val('flatPrice'),
     flatDownPayment: val('flatDownPayment'),
-    objects: [
-      {name:val('o1_name'),type:val('o1_type'),photo:val('o1_photo'),price:val('o1_price'),link:val('o1_link'),bullets:val('o1_bullets')},
-      {name:val('o2_name'),type:val('o2_type'),photo:val('o2_photo'),price:val('o2_price'),link:val('o2_link'),bullets:val('o2_bullets')},
-      val('addThird') ? {name:val('o3_name'),type:val('o3_type'),photo:val('o3_photo'),price:val('o3_price'),link:val('o3_link'),bullets:val('o3_bullets')} : null
-    ].filter(o=>o && (o.name||o.price)),
+    objects: Array.from(document.querySelectorAll('#objectsContainer .objectBlock')).map(block=>({
+      name: block.querySelector('.obj-name').value,
+      type: block.querySelector('.obj-type').value,
+      photo: block.querySelector('.obj-photo').value,
+      price: block.querySelector('.obj-price').value,
+      link: block.querySelector('.obj-link').value,
+      bullets: block.querySelector('.obj-bullets').value
+    })).filter(o=>o.name||o.price),
     agentName: val('agentName'),
     agentPhone: val('agentPhone'),
     agentTelegram: val('agentTelegram'),
@@ -439,6 +420,62 @@ function renderKP(d){
       </div>`;
   }
 
+  let landAltBlock = '';
+  if(d.showLandAlt){
+    const landPrice = Number(d.plotBudget)||0;
+    const cash = Number(d.cashAvailable)||0;
+    const totalProject = landPrice + (Number(d.budgetTotal)||0);
+    const principalAlt = Math.max(0, totalProject - cash);
+    const rateAlt = d.familyMortgage ? d.rateFamily : d.rateMarket;
+    const payAlt = annuity(principalAlt, rateAlt, d.termYears);
+    const reserve = Math.max(0, cash - landPrice);
+    landAltBlock = `
+      <div class="kp-section">
+        <h2>Участок за нал или участок + дом?</h2>
+        <div class="pay-grid">
+          <div class="pay-card">
+            <div class="label">Весь капитал — в участок</div>
+            <div class="amount">${fmtMoney(landPrice)}</div>
+            <div class="sub">${reserve>0 ? 'в резерве останется '+fmtMoney(reserve) : 'свободных денег не останется'}, дома нет</div>
+          </div>
+          <div class="pay-card family">
+            <div class="label">Тот же капитал — как ПВ за участок + дом</div>
+            <div class="amount">${fmtMonth(payAlt)}</div>
+            <div class="sub">по ${rateAlt||'—'}% на ${esc(d.termYears)||'—'} лет, весь проект ${fmtMoney(totalProject)}</div>
+          </div>
+        </div>
+        <div class="save-pill">Тот же капитал — и участок, и дом, а не просто земля</div>
+      </div>`;
+  }
+
+  let landMortgageBlock = '';
+  if(d.compareLandMortgage){
+    const dp = Number(d.downPayment)||0;
+    const landPrincipal = Math.max(0, (Number(d.plotBudget)||0) - dp);
+    const landOnlyPay = annuity(landPrincipal, d.rateMarket, d.termYears);
+    const comboPrincipal = Math.max(0, (Number(d.plotBudget)||0) + (Number(d.budgetTotal)||0) - dp);
+    const comboRate = d.familyMortgage ? d.rateFamily : d.rateMarket;
+    const comboPay = annuity(comboPrincipal, comboRate, d.termYears);
+    const delta = Math.round(comboPay - landOnlyPay);
+    landMortgageBlock = `
+      <div class="kp-section">
+        <h2>Ипотека на участок или участок + дом?</h2>
+        <div class="pay-grid">
+          <div class="pay-card">
+            <div class="label">Только участок (${esc(d.rateMarket)||'—'}%)</div>
+            <div class="amount">${fmtMonth(landOnlyPay)}</div>
+            <div class="sub">семейная ставка на голый участок обычно не действует</div>
+          </div>
+          <div class="pay-card family">
+            <div class="label">Участок + дом (${esc(comboRate)||'—'}%)</div>
+            <div class="amount">${fmtMonth(comboPay)}</div>
+            <div class="sub">тот же ПВ, платёж — сразу за землю и дом</div>
+          </div>
+        </div>
+        <div class="save-pill">${delta>0 ? `Дом «в довесок» к участку — всего +${fmtMonth(delta)} к платежу` : `Дом обойдётся не дороже — а он у вас уже будет`}</div>
+      </div>`;
+  }
+
   const objCards = (d.objects||[]).map(o=>`
     <div class="obj-card">
       ${o.photo ? `<img src="${esc(o.photo)}" alt="${esc(o.name)}">` : ''}
@@ -481,6 +518,10 @@ function renderKP(d){
       ${payBlock}
     </div>
 
+    ${landAltBlock}
+
+    ${landMortgageBlock}
+
     ${flatBlock}
 
     <div class="kp-section">
@@ -510,16 +551,61 @@ function renderKP(d){
   `;
 }
 
+/* ======= dynamic object blocks ======= */
+function objectBlockHTML(n){
+  return `
+    <div class="objHead"><h3>Объект ${n}</h3><button type="button" class="btn-remove-obj" title="Удалить объект">✕</button></div>
+    <div class="row2">
+      <div class="field"><label>Название</label><input type="text" class="obj-name" placeholder="Посёлок «Лесной берег»"></div>
+      <div class="field"><label>Тип</label><select class="obj-type"><option>Посёлок</option><option>Подрядчик</option></select></div>
+    </div>
+    <div class="field"><label>Фото, URL</label><input type="url" class="obj-photo" placeholder="https://..."></div>
+    <div class="row2">
+      <div class="field"><label>Бюджет / цена</label><input type="text" class="obj-price" placeholder="от 5,8 млн ₽"></div>
+      <div class="field"><label>Ссылка</label><input type="url" class="obj-link" placeholder="https://..."></div>
+    </div>
+    <div class="field"><label>Ключевые преимущества (по одному на строку)</label><textarea class="obj-bullets"></textarea></div>
+  `;
+}
+function renumberObjects(){
+  document.querySelectorAll('#objectsContainer .objectBlock .objHead h3').forEach((el,i)=>{
+    el.textContent = 'Объект ' + (i+1);
+  });
+}
+function addObjectBlock(){
+  const container = document.getElementById('objectsContainer');
+  const n = container.children.length + 1;
+  const block = document.createElement('div');
+  block.className = 'objectBlock';
+  block.innerHTML = objectBlockHTML(n);
+  block.querySelector('.btn-remove-obj').addEventListener('click', ()=>{
+    block.remove();
+    renumberObjects();
+    document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
+  });
+  container.appendChild(block);
+}
+
 /* ======= builder mode wiring ======= */
 function initBuilder(){
   document.getElementById('consultDate').value = new Date().toISOString().slice(0,10);
 
-  const form = document.querySelector('.formPanel');
-  form.addEventListener('input', ()=>{
+  addObjectBlock();
+  addObjectBlock();
+  document.getElementById('btnAddObject').addEventListener('click', ()=>{
+    addObjectBlock();
     document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
   });
-  document.getElementById('addThird').addEventListener('change', (e)=>{
-    document.getElementById('o3_block').style.display = e.target.checked ? 'block' : 'none';
+
+  document.getElementById('productType').addEventListener('change', (e)=>{
+    if(e.target.value === 'Участок без подряда'){
+      document.getElementById('showLandAlt').checked = true;
+      document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
+    }
+  });
+
+  const form = document.querySelector('.formPanel');
+  form.addEventListener('input', ()=>{
     document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
   });
 
