@@ -358,8 +358,8 @@ function prefillFromSession(){
   const settlements = Array.isArray(s.selectedSettlements) ? s.selectedSettlements : [];
   const houses = Array.isArray(s.selectedHouseProjects) ? s.selectedHouseProjects : [];
   const items = [
-    ...settlements.map(x => ({ name: x.name, type: 'Посёлок', price: x.priceLand || '' })),
-    ...houses.map(x => ({ name: x.name, type: 'Дом', price: '' }))
+    ...settlements.map(x => ({ name: x.name, type: 'Посёлок', price: x.priceLand || '', photo: x.photo || '', bullets: x.notes || '' })),
+    ...houses.map(x => ({ name: x.name, type: 'Дом', price: '', photo: x.photo || '', bullets: x.description || '' }))
   ];
   if(!items.length) return false;
 
@@ -371,6 +371,8 @@ function prefillFromSession(){
     block.querySelector('.obj-name').value = it.name;
     block.querySelector('.obj-type').value = it.type;
     if(it.price) block.querySelector('.obj-price').value = it.price;
+    if(it.photo) block.querySelector('.obj-photo').value = it.photo;
+    if(it.bullets) block.querySelector('.obj-bullets').value = it.bullets;
   });
   return true;
 }
