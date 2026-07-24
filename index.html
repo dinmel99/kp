@@ -327,9 +327,57 @@ function fmtDate(d){
   return `${parseInt(parts[2],10)} ${months[parseInt(parts[1],10)-1]} ${parts[0]}`;
 }
 
+/* ======= client session (shared across dinmel99.github.io tools) ======= */
+const SESSION_KEY = 'izhs_session';
+
+function loadSession(){
+  try{ return JSON.parse(localStorage.getItem(SESSION_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+
+function saveSession(patch){
+  const merged = Object.assign(loadSession(), patch, {updatedAt: Date.now()});
+  localStorage.setItem(SESSION_KEY, JSON.stringify(merged));
+  try{ window.parent.postMessage({type:'izhs_session_update', session: merged}, '*'); }
+  catch(e){ /* нет родителя — ничего страшного */ }
+}
+
+// Предзаполняем бриф тем, что агент уже собрал в других инструментах.
+// Подрядчик из сессии сюда намеренно не подставляется — это отдельный
+// справочный этап («встреча у подрядчика»), в КП он не идёт.
+// Возвращает true, если удалось создать хотя бы один блок «Объекты» —
+// тогда initBuilder не должен добавлять два дефолтных пустых блока.
+function prefillFromSession(){
+  const s = loadSession();
+  if(s.clientName)  { const el=document.getElementById('clientName');     if(el) el.value = s.clientName; }
+  if(s.budget)       { const el=document.getElementById('budgetTotal');   if(el) el.value = s.budget; }
+  if(s.technology)   { const el=document.getElementById('technology');    if(el) el.value = s.technology; }
+  if(s.finishType)   { const el=document.getElementById('finish');        if(el) el.value = s.finishType; }
+  if(s.location)     { const el=document.getElementById('plotDirection'); if(el) el.value = s.location; }
+
+  const settlements = Array.isArray(s.selectedSettlements) ? s.selectedSettlements : [];
+  const houses = Array.isArray(s.selectedHouseProjects) ? s.selectedHouseProjects : [];
+  const items = [
+    ...settlements.map(x => ({ name: x.name, type: 'Посёлок', price: x.priceLand || '' })),
+    ...houses.map(x => ({ name: x.name, type: 'Дом', price: '' }))
+  ];
+  if(!items.length) return false;
+
+  document.getElementById('objectsContainer').innerHTML = '';
+  items.forEach(it=>{
+    addObjectBlock();
+    const blocks = document.querySelectorAll('#objectsContainer .objectBlock');
+    const block = blocks[blocks.length - 1];
+    block.querySelector('.obj-name').value = it.name;
+    block.querySelector('.obj-type').value = it.type;
+    if(it.price) block.querySelector('.obj-price').value = it.price;
+  });
+  return true;
+}
+
 /* ======= collect form data ======= */
 function collectFormData(){
-  return {
+  const data = {
     clientName: val('clientName'),
     consultDate: val('consultDate'),
     moveInTerm: val('moveInTerm'),
@@ -368,6 +416,14 @@ function collectFormData(){
     agentTelegram: val('agentTelegram'),
     dinislamContact: val('dinislamContact')
   };
+  saveSession({
+    clientName: data.clientName,
+    budget: data.budgetTotal,
+    technology: data.technology,
+    finishType: data.finish,
+    location: data.plotDirection
+  });
+  return data;
 }
 
 /* ======= render KP ======= */
@@ -557,7 +613,7 @@ function objectBlockHTML(n){
     <div class="objHead"><h3>Объект ${n}</h3><button type="button" class="btn-remove-obj" title="Удалить объект">✕</button></div>
     <div class="row2">
       <div class="field"><label>Название</label><input type="text" class="obj-name" placeholder="Посёлок «Лесной берег»"></div>
-      <div class="field"><label>Тип</label><select class="obj-type"><option>Посёлок</option><option>Подрядчик</option></select></div>
+      <div class="field"><label>Тип</label><select class="obj-type"><option>Посёлок</option><option>Дом</option><option>Подрядчик</option></select></div>
     </div>
     <div class="field"><label>Фото, URL</label><input type="url" class="obj-photo" placeholder="https://..."></div>
     <div class="row2">
@@ -589,9 +645,12 @@ function addObjectBlock(){
 /* ======= builder mode wiring ======= */
 function initBuilder(){
   document.getElementById('consultDate').value = new Date().toISOString().slice(0,10);
+  const filledFromSession = prefillFromSession();
 
-  addObjectBlock();
-  addObjectBlock();
+  if(!filledFromSession){
+    addObjectBlock();
+    addObjectBlock();
+  }
   document.getElementById('btnAddObject').addEventListener('click', ()=>{
     addObjectBlock();
     document.getElementById('kpDocument').innerHTML = renderKP(collectFormData());
